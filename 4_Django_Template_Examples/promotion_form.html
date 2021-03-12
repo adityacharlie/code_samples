@@ -1,0 +1,165 @@
+<!-- AN EXAMPLE OF FORM USED IN A TEMPLATE LAYER OF A DJANGO APP
+    A SIMPLE ONE LINER {% crispy promotion_form %} CREATES A LARGE
+    FORM WITHOUT WRITING ANY HTML CODE
+-->
+
+{% extends "home.html" %}
+{% load extras %}
+{% load crispy_forms_tags %}
+{% block body %}
+<div class="col-md-12">
+    <h3><i class="fa {{promotion_form_icon}} fa-lg"></i> {{promotion_form_name}}</h3>
+    <div class="row">
+        <div class="col-md-7">
+        {% crispy promotion_form %}
+        </div>
+        <div class="col-md-5">
+        {% if promotion %}
+            <h4><i class="fa fa-upload"></i> Upload Media</h4>
+            <div class="row">
+            {% if media_list %}
+                <div class="col-md-12">
+                    <div class="col-md-8"><strong>Name</strong></div>
+                    <div class="col-md-2"><strong>Type</strong></div>
+                    <div class="col-md-2"><strong>Action</strong></div>
+                </div>
+                
+                {% for each_media in media_list %}
+                <div class="col-md-12">
+                    <div class="col-md-8">{{each_media.name}}</div>
+                    <div class="col-md-2">{{each_media.type}}</div>
+                    <div class="col-md-2">
+                        <a target='_blank' href="http://s3.amazonaws.com/rmapp/{{each_media.name}}">
+                            <i class="glyphicon glyphicon-eye-open"></i>
+                        </a>
+                        <a onclick="if (confirm('Are you sure you want to delete creative?')) window.location.href='{% url 'media_delete' mid=each_media.id %}'">
+                            <i class="glyphicon glyphicon-trash glyphicon-white"></i>
+                        </a>
+                    </div>
+                </div>
+                {%endfor%}
+
+            {%endif%}
+            <div class="col-md-12">
+             {% crispy media_form %}
+            </div>
+                
+                
+            {%if percentage_count %}
+                <div class="col-md-12">
+                <h3><i class="fa fa-users fa-lg"></i> Product Count</h3>
+                    <label>An estimated {{product_count}} products of the total {{total_count}} belong to this promotion.</label>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow={{percentage_count}} aria-valuemin="0" aria-valuemax="100" style="width: {{percentage_count}}%;">{{percentage_count}}%</div>
+                    </div>
+                </div>
+            {% endif %}
+                
+            </div>
+        {%endif%}          
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{{STATIC_URL}}css/daterangepicker-bs3.css" type="text/css">
+<link rel="stylesheet" href="{{STATIC_URL}}css/bootstrap-slider.min.css" type="text/css">
+<link rel="stylesheet" href="{{STATIC_URL}}css/selectize.bootstrap3.css" type="text/css">
+<link rel="stylesheet" href="{{STATIC_URL}}css/query-builder.min.css" type="text/css">
+    <style>
+    .ui-datepicker { z-index: 3 !important;}
+    .query-builder .rule-container select {
+        border: 1px solid #b8b8b8;
+        /*padding: 8px 8px;*/
+        display: inline-block;
+        width: 100%;
+        height: 34px;
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+    }
+    .query-builder .rule-container .btn {
+        margin-top: 5px;
+    }
+    .query-builder .selectize-control {
+        display: inline-block;
+        min-width: 150px;
+    }
+    .query-builder .rules-group-container{
+        background:none;
+        border:none;
+    }
+    </style>
+{% endblock %}
+
+{% block extrajs %}
+<!-- Date Range Picker -->
+<script type="text/javascript" src="{{STATIC_URL}}js/moment.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/selectize.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/daterangepicker.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-slider.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+    {% if promotion.type == 2 %}
+        $("#id_linear_creative").selectize();
+        $("#id_non_linear_creative").selectize();
+        $("#id_companion_creative").selectize();
+    {%else%}
+        $("#id_creative").selectize();
+    {%endif%}
+        $("#id_behaviour").selectize();
+        $("#id_context").selectize();
+        $("#id_languages").selectize();
+        $("#id_filter_segment").selectize();
+        $("#id_block_segment").selectize();
+        $("#id_filter_list").selectize();
+        $("#id_block_list").selectize();
+
+        // Accordination default is hide
+        $('.panel-collapse.in').collapse('hide');
+        //Schedule
+        $('#id_start').daterangepicker({ format: 'YYYY-MM-DD', singleDatePicker: true});
+        $('#id_end').daterangepicker({ format: 'YYYY-MM-DD', singleDatePicker: true});
+        {% for key,value in schedule_data.items %}
+        $('#id_{{key}}').slider({ id: "slide_{{key}}", min: 0, max: 24, range: true, value: {{value}} });
+        {%endfor%}
+    });    
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#locations').selectize({
+            valueField: 'id',
+            labelField: 'label',
+            searchField: 'text',
+            load: function(query, callback) {
+                if (!query.length) return callback();
+                $.ajax({
+                    url: '{% url "get_locations" %}',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        q: query
+                    },
+                    error: function() {
+                        callback();
+                    },
+                    success: function(res) {
+                        callback(res);
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

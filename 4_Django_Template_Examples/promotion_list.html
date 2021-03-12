@@ -1,0 +1,32 @@
+<!-- AN EXAMPLE SIMPLE TABLE IN TEMPLATES
+    ENSURING TEMPLATE INHERITANCE IN DJANGO TEMPLATES
+-->
+{% extends "table.html" %}
+{% block table_data %}
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Type</th>
+            <th>CPM</th>
+            <th>Created</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for promotion in promotions %}
+        <tr ng-repeat="promotion in promotions" ng-class-odd="'odd'" ng-class-even="'even'">
+            <td>{{promotion.name}}</td>
+            <td>{{promotion.owner.company_name}}</td>
+            <td>{{promotion.get_type_display}}</td>
+            <td>{{promotion.cpm}}</td>
+            <td>{{promotion.created_at}}</td>
+            <td>
+                <a href="/promotions/view/{{promotion.get_type_display|lower}}/{{promotion.id}}" title="View"><i class="glyphicon glyphicon-eye-open"></i></a>
+                &nbsp;
+                <a href="/promotions/{{promotion.get_type_display|lower}}/{{promotion.id}}" title="Edit"><i class="glyphicon glyphicon-pencil"></i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+{% endblock %}

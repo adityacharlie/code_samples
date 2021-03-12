@@ -1,0 +1,188 @@
+<!-- ANOTHER EXAMPLE OF TEMPALTES IN DJANGO WITH LOT OF BOOTSTRAP
+    IMPLEMENTATION AND EMBEDDING OF THIRD PARTY JQUERY LIBRARIES
+    EACH LAYER OF CSS AND JQUERY EMBEDDING FOLLOWS TEMPLATE INHERITANCE
+    {% block extrajs %} -> FOR EXTRA JS LIBRARIES
+    {% block extracss %} -> FOR EXTRA CSS FILES
+
+-->
+
+{% extends "home.html" %}
+{% block body %}
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>
+                {% if promotion.type == 1 %}
+                    <i class="fa fa-picture-o"></i>
+                {% elif promotion.type == 2 %}
+                    <i class="fa fa-video-camera"></i> 
+                {% elif promotion.type == 3 %}
+                    <i class="fa fa-signal"></i>
+                {% elif promotion.type == 4 %}
+                    <i class="fa fa-rss"></i>
+                {% endif %}
+                Promotion: {{promotion.name}}
+            </h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <li style=" list-style-type: none; "><strong>{{ type|capfirst }}</strong> : <a href="{% url 'promotion_edit' ptype=type pid=promotion.id %}">{{ promotion.name }}</a> of {{ promotion.owner.company_name }}</li>
+                    <li style=" list-style-type: none; "><strong>CPM &amp; CPC</strong> : {{ promotion.cpm }} &amp; {{ promotion.cpc }} {{ promotion.owner.get_currency_display }}</li>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Site Reports</h3>
+            <div class="row">
+                <div class="col-md-6" id="table-tools-options"></div>
+            </div>
+            <div class="widget">
+                <form id="dates_form" method="post" action=".">{% csrf_token %}
+                    <div id="dates" class="pull-right">
+                        <i class="fa fa-calendar"></i>
+                        <span>{{dates}}</span> <b class="caret"></b>&nbsp;&nbsp;
+                    </div>
+                    <input type="hidden" name="dates" id="dates_field"/>
+                </form>
+            </div>
+            <table id="rtb-table" class="table table-striped table-bordered">
+                <thead>
+                        <tr>
+                            <th>Publisher</th>
+                            <th>Zone</th>
+                            <th>Promotion</th>
+                            <th>Url</th>
+                            <th>Requests</th>
+                            <th>Bids</th>
+                            <th>Wins</th>
+                        </tr>
+                </thead>
+                <tbody>
+                    {% for report in rtb_data %}
+                    <tr ng-repeat="promotion in promotions" ng-class-odd="'odd'" ng-class-even="'even'">
+                        <td>{{report.publisher}}</td>
+                        <td>{{report.zname}}</td>
+                        <td>{{report.pname}}</td>
+                        <td>{{report.url}}</td>
+                        <td>{{report.requests}}</td>
+                        <td>{{report.bids}}</td>
+                        <td>{{report.wins}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>  
+    <div class="row">
+    {% if promotion.type == 1 or promotion.type == 3 or promotion.type == 4 %}
+        <div class="col-md-12">
+            <h3>Reports</h3>
+            <table id="datatable-table" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Publisher</th>
+                        <th>Zone</th>
+                        <th>Impressions</th>
+                        <th>Clicks</th>
+                        <th>CTR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in report_data %}
+                    <tr ng-repeat="promotion in promotions" ng-class-odd="'odd'" ng-class-even="'even'">
+                        <td>{{report.publisher}}</td>
+                        <td>{{report.zname}}</td>
+                        <td>{{report.impressions}}</td>
+                        <td>{{report.clicks}}</td>
+                        <td>{{report.CTR}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}    
+        {% if promotion.type == 2 %}       
+        <div class="col-md-12">
+            <h3>Reports</h3>
+            <table id="datatable-table" class="table table-striped table-bordered">
+                <thead>
+                        <tr>
+                            <th>Publisher</th>
+                            <th>Zone</th>
+                            <th>Impressions</th>
+                            <th>Clicks</th>
+                            <th>CTR</th>
+                        </tr>
+                    </thead>
+                <tbody>
+                    {% for report in report_data %}
+                    <tr ng-repeat="promotion in promotions" ng-class-odd="'odd'" ng-class-even="'even'">
+                        <td>{{report.publisher}}</td>
+                        <td>{{report.zname}}</td>
+                        <td>{{report.impressions}}</td>
+                        <td>{{report.clicks}}</td>
+                        <td>{{report.CTR}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{{STATIC_URL}}css/daterangepicker-bs3.css" type="text/css">
+<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/3cfcc339e89/integration/bootstrap/3/dataTables.bootstrap.css">
+<style>
+    
+    div.DTTT { margin-top: 1.3em; margin-bottom: 0.5em; }
+    div.dataTables_wrapper { clear: both; }
+    @media screen and (max-width: 767px) {
+        div#table-tools-options {text-align: center}
+    }
+    
+</style>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{{STATIC_URL}}js/moment.min.js"> </script>
+<script src="{{STATIC_URL}}js/daterangepicker.js"> </script>
+<script src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+<script src="{{STATIC_URL}}js/tables-dynamic.js"></script>
+<script type="text/javascript" src="//www.datatables.net/release-datatables/extensions/TableTools/js/dataTables.tableTools.js"></script>
+<script type="text/javascript" src="//cdn.datatables.net/plug-ins/3cfcc339e89/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#rtb-table').dataTable();
+    var tt = new $.fn.dataTable.TableTools( table, {sSwfPath: "{{STATIC_URL}}js/copy_csv_xls_pdf.swf"});
+    $( '#table-tools-options' ).append( tt.fnContainer() );
+    $('#dates').daterangepicker(
+        {
+            ranges: {
+             'Today': [moment(), moment()],
+             'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
+             'Last 7 Days': [moment().subtract('days', 6), moment()],
+             'Last 30 Days': [moment().subtract('days', 29), moment()],
+             'This Month': [moment().startOf('month'), moment().endOf('month')],
+             'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+            },
+            startDate: moment("{{start}}"),
+            endDate: moment("{{end}}")
+        },
+        function(start, end) {
+            date_str = start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD');
+            $('#dates span').html(date_str);
+            $('#dates_field').val(date_str);
+            $('#dates_form').submit();
+        }
+    );
+} )
+</script>
+{% endblock %}
